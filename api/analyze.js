@@ -35,39 +35,30 @@ module.exports = async (req, res) => {
             });
         }
 
-        // BERSIHKAN OTOMATIS: Hapus spasi dan tanda kutip (" atau ') yang tidak sengaja ikut ter-paste
+        // Bersihkan spasi atau tanda kutip otomatis
         const cleanApiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
 
-        // FITUR DETEKTOR MANDIRI: Mendukung format lama (AIzaSy) dan format baru (AQ.) secara resmi
-        if (!cleanApiKey.startsWith("AIzaSy") && !cleanApiKey.startsWith("AQ.")) {
-            return res.status(500).json({
-                success: false,
-                error: `[DETEKSI FORMAT SALAH] API Key harus diawali 'AIzaSy' atau 'AQ.', tetapi mendeteksi awalan: '${cleanApiKey.substring(0, 6)}...' (Panjang total: ${cleanApiKey.length} karakter). Sila periksa kembali di dashboard Vercel.`
-            });
-        }
-
-        // Inisialisasi Google Gen AI menggunakan kunci yang sudah murni bersih
+        // Inisialisasi Google Gen AI
         const genAI = new GoogleGenerativeAI(cleanApiKey);
         
-        // Mempertahankan model pilihan asli: gemini-2.5-flash
         const model = genAI.getGenerativeModel({ 
             model: 'gemini-2.5-flash',
             generationConfig: { responseMimeType: "application/json" }
         });
 
-        // Prompt optimal dengan validasi kulkas kosong (Anti-Halusinasi)
-        const prompt = `Analyze the contents of the refrigerator in this photo. Based on the available ingredients, provide 3 to 5 feasible recipe recommendations and group them by their respective cuisine type (e.g., "Indonesian Recipe", "Chinese Recipe", "Italian Recipe", "American Recipe", "Mexican Recipe").
+        // PROMPT KALIBRASI BARU: Jauh lebih cerdas membedakan kulkas beneran kosong vs kulkas penuh susu/minuman
+        const prompt = `Analyze the contents of the refrigerator in this photo. Based on the available ingredients, provide 3 to 5 feasible recipe recommendations and group them by their respective cuisine type (e.g., "Indonesian Recipe", "Western Dessert", "Japanese Recipe", "Beverage Corner").
 
-        CRITICAL CONDITION: If the refrigerator is completely empty, contains only water/expired items, or does not contain any viable cooking ingredients to make a proper meal, you MUST strictly return an empty JSON array: []. Do not hallucinate ingredients or invent recipes out of nothing.
+        CRITICAL CONDITION: Only return an empty JSON array ([]) if the refrigerator is literally completely empty, containing absolutely no food, or contains only non-edible items (like empty plastic, medicine, or just plain water bottles). If there are visible food items, vegetables, fruits, condiments, or dairy beverages (such as milk, yogurt, juices, etc.), you MUST use your culinary creativity to suggest recipes, snacks, desserts, or simple beverages that can utilize them. Do not be overly restrictive.
 
-        Otherwise, if ingredients are found, return a valid JSON Array where each object contains "cuisine", "name", "image_keyword" (strictly provide 1 single lowercase English food category word, chosen ONLY from this list: "omelette", "stirfry", "pasta", "salad", "soup", "rice", "chicken"), "ingredients" (array of strings), and "steps" (array of strings). Follow this exact structural schema:
+        Return a valid JSON Array where each object contains "cuisine", "name", "image_keyword" (strictly provide 1 single lowercase English food category word, chosen ONLY from this list: "omelette", "stirfry", "pasta", "salad", "soup", "rice", "chicken", "dessert", "drink", "snack"), "ingredients" (array of strings), and "steps" (array of strings). Follow this exact structural schema:
         [
           {
-            "cuisine": "Italian Recipe",
-            "name": "Classic Creamy Carbonara",
-            "image_keyword": "pasta",
-            "ingredients": ["Pasta", "Eggs", "Garlic", "Cheese", "Black Pepper"],
-            "steps": ["Boil the pasta in salted water until al dente.", "Whisk the eggs and cheese together in a bowl.", "Pan-fry the garlic, combine everything off the heat, and toss until creamy."]
+            "cuisine": "Western Dessert",
+            "name": "Classic Milk Pudding",
+            "image_keyword": "dessert",
+            "ingredients": ["Milk", "Sugar", "Agar-agar powder"],
+            "steps": ["Mix milk, sugar, and agar-agar powder in a pot.", "Boil the mixture over medium heat while stirring continuously.", "Pour into molds and let it cool inside the fridge until set."]
           }
         ]`;
 
@@ -80,7 +71,7 @@ module.exports = async (req, res) => {
         const response = await result.response;
         const text = response.text();
 
-        // Pembersihan tag markdown ```json ... ``` seandainya model AI menyertakannya dalam output
+        // Pembersihan tag markdown ```json ... ```
         let cleanText = text.trim();
         if (cleanText.startsWith("```json")) {
             cleanText = cleanText.replace(/^```json/, "").replace(/```$/, "");
@@ -88,7 +79,7 @@ module.exports = async (req, res) => {
             cleanText = cleanText.replace(/^```/, "").replace(/```$/, "");
         }
 
-        // Parsing hasil string bersih menjadi struktur JSON murni
+        // Parsing hasil string menjadi JSON
         try {
             const parsedRecipes = JSON.parse(cleanText.trim());
             return res.status(200).json({ success: true, recipes: parsedRecipes });
