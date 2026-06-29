@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WTFridge? </title>
+    <title>wtfridge? </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,8 +59,8 @@
 
     <div class="max-w-4xl mx-auto">
         <header class="text-center mb-10">
-            <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight text-premiumPink-dark">
-                WTFridge<span class="text-premiumPink-300">?</span>
+            <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight text-premiumPink-dark lowercase">
+                wtfridge<span class="text-premiumPink-300">?</span>
             </h1>
             <div class="w-12 h-[2px] bg-premiumPink-300 mx-auto mt-4 rounded-full"></div>
         </header>
@@ -165,6 +165,63 @@
             }
         });
 
+        // ENGINE UTAMA PENCARI GAMBAR YANG SINKRON DENGAN TEKS JUDUL RESEP
+        function getRecipeImage(name, keyword) {
+            const title = name.toLowerCase();
+            const key = keyword.toLowerCase();
+            
+            // 1. Deteksi Spesifik Berdasarkan Nama Menu Kuliner (Prioritas Utama)
+            if (title.includes('pudding') || title.includes('puding')) {
+                return 'https://images.unsplash.com/photo-1511018556340-d16986a1c194?auto=format&fit=crop&w=600&q=80'; // Gambar Pudding
+            }
+            if (title.includes('milkshake') || title.includes('shake')) {
+                return 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80'; // Gambar Milkshake Susu
+            }
+            if (title.includes('smoothie') || title.includes('smoothies')) {
+                return 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80'; // Gambar Smoothie sehat
+            }
+            if (title.includes('juice') || title.includes('jus')) {
+                return 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80'; // Gambar Juice Buah Segar
+            }
+            if (title.includes('omelette') || title.includes('egg') || title.includes('telur')) {
+                return 'https://images.unsplash.com/photo-1494597564530-871f2b93ac55?auto=format&fit=crop&w=600&q=80';
+            }
+            if (title.includes('pasta') || title.includes('spaghetti')) {
+                return 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80';
+            }
+            if (title.includes('salad')) {
+                return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80';
+            }
+            if (title.includes('soup') || title.includes('sup') || title.includes('soto')) {
+                return 'https://images.unsplash.com/photo-1547592165-e1d17fed6005?auto=format&fit=crop&w=600&q=80';
+            }
+            if (title.includes('rice') || title.includes('nasi')) {
+                return 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=600&q=80';
+            }
+            if (title.includes('chicken') || title.includes('ayam')) {
+                return 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=600&q=80';
+            }
+            if (title.includes('stirfry') || title.includes('tumis')) {
+                return 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80';
+            }
+
+            // 2. Fallback ke Kategori Makro AI jika tidak ada kata kunci spesifik di atas
+            const imageMap = {
+                omelette: 'https://images.unsplash.com/photo-1494597564530-871f2b93ac55?auto=format&fit=crop&w=600&q=80',
+                stirfry: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
+                pasta: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80',
+                salad: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80',
+                soup: 'https://images.unsplash.com/photo-1547592165-e1d17fed6005?auto=format&fit=crop&w=600&q=80',
+                rice: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=600&q=80',
+                chicken: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=600&q=80',
+                dessert: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80',
+                drink: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80',
+                snack: 'https://images.unsplash.com/photo-1599490659213-e2b9527bb087?auto=format&fit=crop&w=600&q=80'
+            };
+
+            return imageMap[key] || imageMap['snack'];
+        }
+
         function renderRecipes(recipes) {
             recipesGrid.innerHTML = '';
             
@@ -187,29 +244,14 @@
                 return;
             }
 
-            // KEMBALIKAN KE LAYOUT GRID ASLI JIKA ADA RESEP
             recipesGrid.className = 'grid gap-6 md:grid-cols-2';
-
-            // Kumpulan database foto kulkas premium terkurasi resolusi tinggi berdasarkan kata kunci AI
-            const imageMap = {
-                omelette: 'https://images.unsplash.com/photo-1494597564530-871f2b93ac55?auto=format&fit=crop&w=600&q=80',
-                stirfry: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
-                pasta: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80',
-                salad: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80',
-                soup: 'https://images.unsplash.com/photo-1547592165-e1d17fed6005?auto=format&fit=crop&w=600&q=80',
-                rice: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=600&q=80',
-                chicken: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=600&q=80',
-                dessert: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80',
-                drink: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80',
-                snack: 'https://images.unsplash.com/photo-1599490659213-e2b9527bb087?auto=format&fit=crop&w=600&q=80'
-            };
             
             recipes.forEach(recipe => {
                 const card = document.createElement('div');
                 card.className = 'recipe-card rounded-2xl p-5 border border-premiumPink-100 shadow-sm flex flex-col justify-between overflow-hidden';
                 
-                // Cari kecocokan foto kulkas, jika keyword meleset default ke snack
-                const imageUrl = imageMap[recipe.image_keyword.toLowerCase()] || imageMap['snack'];
+                // Panggil Dynamic Matcher untuk mendapatkan gambar Unsplash yang akurat
+                const imageUrl = getRecipeImage(recipe.name, recipe.image_keyword);
 
                 const ingredientsHTML = recipe.ingredients.map(ing => 
                     `<li class="flex items-center gap-2 text-sm text-premiumPink-dark/80">
