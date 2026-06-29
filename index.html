@@ -6,7 +6,7 @@
     <title>WTFridge? </title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Playfair Display (Culinary Premium Feel) & Plus Jakarta Sans -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -60,7 +60,7 @@
 <body class="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
 
     <div class="max-w-4xl mx-auto">
-        <!-- HEADER (Tagline Telah Dihapus) -->
+        <!-- HEADER -->
         <header class="text-center mb-10">
             <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight text-premiumPink-dark">
                 WTFridge<span class="text-premiumPink-300">?</span>
@@ -179,6 +179,28 @@
 
         function renderRecipes(recipes) {
             recipesGrid.innerHTML = '';
+            
+            // JIKA KULKAS KOSONG ATAU AI MENGEMBALIKAN ARRAY KOSONG []
+            if (!recipes || recipes.length === 0) {
+                recipesGrid.className = 'grid gap-6 grid-cols-1';
+                recipesGrid.innerHTML = `
+                    <div class="text-center py-12 bg-white/60 rounded-2xl p-8 border border-premiumPink-100 shadow-sm flex flex-col items-center justify-center">
+                        <div class="w-12 h-12 bg-premiumPink-100 rounded-full flex items-center justify-center text-premiumPink-300 mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+                            </svg>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-premiumPink-dark mb-1">Kulkasmu Terlihat Kosong</h3>
+                        <p class="text-sm text-premiumPink-dark/60 max-w-md">Gemini tidak mendeteksi adanya bahan makanan yang cukup untuk diolah. Coba isi kulkasmu atau pastikan pencahayaan foto sudah jelas ya!</p>
+                    </div>
+                `;
+                resultsSection.classList.remove('hidden');
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            // KEMBALIKAN KE LAYOUT GRID ASLI JIKA ADA RESEP
+            recipesGrid.className = 'grid gap-6 md:grid-cols-2';
             
             recipes.forEach(recipe => {
                 const card = document.createElement('div');
