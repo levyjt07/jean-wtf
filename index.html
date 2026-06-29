@@ -77,27 +77,27 @@
                 </div>
 
                 <div id="uploadText">
-                    <p class="text-lg font-semibold text-premiumPink-dark">Foto Isi Kulkasmu</p>
-                    <p class="text-xs text-premiumPink-dark/60 mt-1">Sila drop gambar di sini atau klik untuk memilih file</p>
+                    <p class="text-lg font-semibold text-premiumPink-dark">Snapshot Your Fridge</p>
+                    <p class="text-xs text-premiumPink-dark/60 mt-1">Drag and drop your image here or click to browse files</p>
                 </div>
 
                 <img id="imagePreview" class="hidden max-h-64 rounded-xl shadow-sm border border-white mt-2 object-cover">
             </div>
 
             <button id="analyzeBtn" disabled class="w-full mt-6 bg-premiumPink-dark text-white font-semibold py-4 px-6 rounded-2xl shadow-lg shadow-premiumPink-dark/20 transition-all hover:bg-premiumPink-dark/90 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                <span>Mulai Analisis Resep</span>
+                <span>Analyze Recipes</span>
             </button>
 
             <div id="loadingState" class="hidden mt-8 text-center py-6">
                 <div class="inline-block w-8 h-8 border-4 border-premiumPink-300 border-t-transparent rounded-full animate-spin mb-3"></div>
-                <p class="text-sm font-medium animate-pulse text-premiumPink-dark/80">Gemini sedang membaca bahan makananmu...</p>
+                <p class="text-sm font-medium animate-pulse text-premiumPink-dark/80">Gemini is scanning your ingredients...</p>
             </div>
 
             <div id="errorState" class="hidden mt-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm"></div>
         </main>
 
         <section id="resultsSection" class="hidden space-y-6 mb-12">
-            <h2 class="font-serif text-2xl font-bold text-premiumPink-dark px-2">Rekomendasi Menu Eksklusif</h2>
+            <h2 class="font-serif text-2xl font-bold text-premiumPink-dark px-2">Curated Menu Recommendations</h2>
             <div class="grid gap-6 md:grid-cols-2" id="recipesGrid">
                 </div>
         </section>
@@ -151,7 +151,7 @@
                 const data = await response.json();
 
                 if (!data.success) {
-                    throw new Error(data.error || 'Terjadi gangguan sistem saat menganalisis kulkas.');
+                    throw new Error(data.error || 'A system error occurred while analyzing the fridge.');
                 }
 
                 renderRecipes(data.recipes);
@@ -165,25 +165,25 @@
             }
         });
 
-        // ENGINE UTAMA PENCARI GAMBAR YANG SINKRON DENGAN TEKS JUDUL RESEP
+        // SMART IMAGE MATCHING ENGINE
         function getRecipeImage(name, keyword) {
             const title = name.toLowerCase();
             const key = keyword.toLowerCase();
             
-            // 1. Deteksi Spesifik Berdasarkan Nama Menu Kuliner (Prioritas Utama)
-            if (title.includes('pudding') || title.includes('puding')) {
-                return 'https://images.unsplash.com/photo-1511018556340-d16986a1c194?auto=format&fit=crop&w=600&q=80'; // Gambar Pudding
+            // 1. Specific Keyword Matching based on Recipe Title
+            if (title.includes('pudding') || title.includes('pading')) {
+                return 'https://images.unsplash.com/photo-1511018556340-d16986a1c194?auto=format&fit=crop&w=600&q=80';
             }
             if (title.includes('milkshake') || title.includes('shake')) {
-                return 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80'; // Gambar Milkshake Susu
+                return 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80';
             }
             if (title.includes('smoothie') || title.includes('smoothies')) {
-                return 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80'; // Gambar Smoothie sehat
+                return 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80';
             }
             if (title.includes('juice') || title.includes('jus')) {
-                return 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80'; // Gambar Juice Buah Segar
+                return 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80';
             }
-            if (title.includes('omelette') || title.includes('egg') || title.includes('telur')) {
+            if (title.includes('omelette') || title.includes('egg')) {
                 return 'https://images.unsplash.com/photo-1494597564530-871f2b93ac55?auto=format&fit=crop&w=600&q=80';
             }
             if (title.includes('pasta') || title.includes('spaghetti')) {
@@ -192,20 +192,20 @@
             if (title.includes('salad')) {
                 return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80';
             }
-            if (title.includes('soup') || title.includes('sup') || title.includes('soto')) {
+            if (title.includes('soup') || title.includes('sup')) {
                 return 'https://images.unsplash.com/photo-1547592165-e1d17fed6005?auto=format&fit=crop&w=600&q=80';
             }
-            if (title.includes('rice') || title.includes('nasi')) {
+            if (title.includes('rice')) {
                 return 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=600&q=80';
             }
-            if (title.includes('chicken') || title.includes('ayam')) {
+            if (title.includes('chicken')) {
                 return 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=600&q=80';
             }
-            if (title.includes('stirfry') || title.includes('tumis')) {
+            if (title.includes('stirfry') || title.includes('fry') || title.includes('saute')) {
                 return 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80';
             }
 
-            // 2. Fallback ke Kategori Makro AI jika tidak ada kata kunci spesifik di atas
+            // 2. Macro Category Fallback Engine
             const imageMap = {
                 omelette: 'https://images.unsplash.com/photo-1494597564530-871f2b93ac55?auto=format&fit=crop&w=600&q=80',
                 stirfry: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
@@ -225,7 +225,7 @@
         function renderRecipes(recipes) {
             recipesGrid.innerHTML = '';
             
-            // JIKA KULKAS KOSONG
+            // EMPTY FRIDGE FALLBACK STATE
             if (!recipes || recipes.length === 0) {
                 recipesGrid.className = 'grid gap-6 grid-cols-1';
                 recipesGrid.innerHTML = `
@@ -235,8 +235,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
                             </svg>
                         </div>
-                        <h3 class="font-serif text-xl font-bold text-premiumPink-dark mb-1">Kulkasmu Terlihat Kosong</h3>
-                        <p class="text-sm text-premiumPink-dark/60 max-w-md">Gemini tidak mendeteksi adanya bahan makanan yang cukup untuk diolah. Coba isi kulkasmu atau pastikan pencahayaan foto sudah jelas ya!</p>
+                        <h3 class="font-serif text-xl font-bold text-premiumPink-dark mb-1">Your Fridge Looks Empty</h3>
+                        <p class="text-sm text-premiumPink-dark/60 max-w-md">Gemini couldn't detect enough viable ingredients to generate recipes. Try restocking your fridge or ensure the photo has clear lighting!</p>
                     </div>
                 `;
                 resultsSection.classList.remove('hidden');
@@ -250,7 +250,6 @@
                 const card = document.createElement('div');
                 card.className = 'recipe-card rounded-2xl p-5 border border-premiumPink-100 shadow-sm flex flex-col justify-between overflow-hidden';
                 
-                // Panggil Dynamic Matcher untuk mendapatkan gambar Unsplash yang akurat
                 const imageUrl = getRecipeImage(recipe.name, recipe.image_keyword);
 
                 const ingredientsHTML = recipe.ingredients.map(ing => 
