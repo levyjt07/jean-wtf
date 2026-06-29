@@ -1,6 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Helper function for artificial delay (retry backoff)
+// Helper function for backoff delays
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 module.exports = async (req, res) => {
@@ -33,10 +33,11 @@ module.exports = async (req, res) => {
         const cleanApiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
         const genAI = new GoogleGenerativeAI(cleanApiKey);
         
-        // Define primary model and ultra-stable backup model
-        const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash'];
-        let result;
-        let lastError;
+        // Target the primary model perfectly
+        const model = genAI.getGenerativeModel({ 
+            model: 'gemini-2.5-flash',
+            generationConfig: { responseMimeType: "application/json" }
+        });
 
         const prompt = `Analyze the contents of the refrigerator in this photo. Based on the available ingredients, provide 3 to 5 feasible recipe recommendations and group them by their respective cuisine type (e.g., "Indonesian Recipe", "Western Dessert", "Japanese Recipe", "Beverage Corner").
 
@@ -57,34 +58,32 @@ module.exports = async (req, res) => {
             inlineData: { data: image, mimeType: mimeType },
         };
 
-        // FAULT-TOLERANT EXECUTION LOOP
-        for (let i = 0; i < modelsToTry.length; i++) {
-            const currentModelName = modelsToTry[i];
+        let result;
+        let lastError;
+        const maxAttempts = 3;
+        const delays = [1000, 2500]; // Wait times between retries if a 503 occurs
+
+        // BACKOFF RETRY LOOP FOR TRANSIENT 503 ERRORS
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
-                const model = genAI.getGenerativeModel({ 
-                    model: currentModelName,
-                    generationConfig: { responseMimeType: "application/json" }
-                });
-                
-                // Execute API call
                 result = await model.generateContent([prompt, imagePart]);
-                
-                // If it succeeds, break out of the loop completely
                 if (result && result.response) {
-                    break;
+                    break; // Success! Break out of the retry loop
                 }
             } catch (err) {
                 lastError = err;
-                // If we hit a 503 or overload on the primary model, wait 1.2 seconds and move to fallback
-                if (i < modelsToTry.length - 1) {
-                    await sleep(1200); 
+                console.warn(`[Attempt ${attempt} Failed]: Gemini server busy. Retrying...`);
+                
+                // If we have attempts left, pause before trying again
+                if (attempt < maxAttempts) {
+                    await sleep(delays[attempt - 1]);
                 }
             }
         }
 
-        // If both models completely failed, throw the final error
+        // If all retry attempts completely exhausted
         if (!result || !result.response) {
-            throw new Error(lastError ? lastError.message : 'All generation models are currently unresponsive.');
+            throw new Error(`Google Gemini is heavily overloaded right now. Please try again in a few moments. (Details: ${lastError.message})`);
         }
 
         const response = await result.response;
@@ -111,7 +110,7 @@ module.exports = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ 
             success: false, 
-            error: `[Server Error]: ${error.message || 'Failed to analyze image.'}` 
+            error: error.message || 'Failed to analyze image due to high API demand.' 
         });
     }
 };
