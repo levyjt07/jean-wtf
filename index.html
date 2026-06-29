@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WTFridge? </title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Playfair Display (Culinary Premium Feel) & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,9 +23,9 @@
                         premiumPink: {
                             50: '#fff6f5',
                             100: '#fbe7e4',
-                            200: '#f6d5ce', // Pink premium lembut mendekati gambar
+                            200: '#f6d5ce',
                             300: '#efa799',
-                            dark: '#4a3e3d', // Warna teks cokelat gelap hangat agar lebih mewah dibanding hitam pekat
+                            dark: '#4a3e3d',
                         }
                     }
                 }
@@ -33,9 +35,8 @@
 
     <style>
         body {
-            /* Pastikan file gambar gingham kamu disimpan dengan nama background.jpg di folder yang sama */
             background-image: url('background.jpg');
-            background-size: 320px; /* Ukuran kotak-kotak yang pas dan tidak terlalu besar */
+            background-size: 320px;
             background-repeat: repeat;
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: #4a3e3d;
@@ -59,20 +60,20 @@
 <body class="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
 
     <div class="max-w-4xl mx-auto">
+        <!-- HEADER (Tagline Telah Dihapus) -->
         <header class="text-center mb-10">
-            <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight text-premiumPink-dark mb-3">
+            <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight text-premiumPink-dark">
                 WTFridge<span class="text-premiumPink-300">?</span>
             </h1>
-            <p class="text-sm md:text-base tracking-wide uppercase font-medium text-premiumPink-dark/70">
-                Turn your leftovers into a premium dining experience
-            </p>
-            <div class="w-16 h-[2px] bg-premiumPink-300 mx-auto mt-4 rounded-full"></div>
+            <div class="w-12 h-[2px] bg-premiumPink-300 mx-auto mt-4 rounded-full"></div>
         </header>
 
+        <!-- MAIN UPLOADER CONTAINER -->
         <main class="premium-glass rounded-3xl p-6 md:p-8 shadow-xl shadow-premiumPink-dark/5 mb-8">
             <div class="flex flex-col items-center justify-center border-2 border-dashed border-premiumPink-200 rounded-2xl p-8 bg-white/40 text-center cursor-pointer transition-colors hover:bg-white/60 relative" id="dropZone">
                 <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                 
+                <!-- Icon Placeholder -->
                 <div class="w-16 h-16 bg-premiumPink-100 rounded-full flex items-center justify-center text-premiumPink-300 mb-4" id="uploadIcon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
@@ -85,28 +86,35 @@
                     <p class="text-xs text-premiumPink-dark/60 mt-1">Sila drop gambar di sini atau klik untuk memilih file</p>
                 </div>
 
+                <!-- Image Preview Screen -->
                 <img id="imagePreview" class="hidden max-h-64 rounded-xl shadow-sm border border-white mt-2 object-cover">
             </div>
 
+            <!-- ACTION BUTTON -->
             <button id="analyzeBtn" disabled class="w-full mt-6 bg-premiumPink-dark text-white font-semibold py-4 px-6 rounded-2xl shadow-lg shadow-premiumPink-dark/20 transition-all hover:bg-premiumPink-dark/90 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 <span>Mulai Analisis Resep</span>
             </button>
 
+            <!-- LOADING SCREEN -->
             <div id="loadingState" class="hidden mt-8 text-center py-6">
                 <div class="inline-block w-8 h-8 border-4 border-premiumPink-300 border-t-transparent rounded-full animate-spin mb-3"></div>
                 <p class="text-sm font-medium animate-pulse text-premiumPink-dark/80">Gemini sedang membaca bahan makananmu...</p>
             </div>
 
+            <!-- ERROR ALERT -->
             <div id="errorState" class="hidden mt-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm"></div>
         </main>
 
+        <!-- RESULTS RECIPES SECTION -->
         <section id="resultsSection" class="hidden space-y-6 mb-12">
             <h2 class="font-serif text-2xl font-bold text-premiumPink-dark px-2">Rekomendasi Menu Eksklusif</h2>
             <div class="grid gap-6 md:grid-cols-2" id="recipesGrid">
-                </div>
+                <!-- Cards ditaruh dinamis via JS -->
+            </div>
         </section>
     </div>
 
+    <!-- FRONTEND SYSTEM JAVASCRIPT -->
     <script>
         const fileInput = document.getElementById('fileInput');
         const analyzeBtn = document.getElementById('analyzeBtn');
@@ -129,7 +137,6 @@
                 reader.onload = function(event) {
                     base64Image = event.target.result.split(',')[1];
                     
-                    // Update UI preview
                     imagePreview.src = event.target.result;
                     imagePreview.classList.remove('hidden');
                     uploadIcon.classList.add('hidden');
@@ -141,7 +148,6 @@
         });
 
         analyzeBtn.addEventListener('click', async function() {
-            // Reset state tampilan
             loadingState.classList.remove('hidden');
             errorState.classList.add('hidden');
             resultsSection.classList.add('hidden');
@@ -160,7 +166,6 @@
                     throw new Error(data.error || 'Terjadi gangguan sistem saat menganalisis kulkas.');
                 }
 
-                // Gambar resep ke UI jika sukses
                 renderRecipes(data.recipes);
 
             } catch (err) {
@@ -179,7 +184,6 @@
                 const card = document.createElement('div');
                 card.className = 'recipe-card rounded-2xl p-6 border border-premiumPink-100 shadow-sm flex flex-col justify-between';
                 
-                // Styling bahan makanan agar estetik dengan bulatan pink mini
                 const ingredientsHTML = recipe.ingredients.map(ing => 
                     `<li class="flex items-center gap-2 text-sm text-premiumPink-dark/80">
                         <span class="w-1.5 h-1.5 bg-premiumPink-300 rounded-full flex-shrink-0"></span>
@@ -187,7 +191,6 @@
                      </li>`
                 ).join('');
 
-                // Styling urutan langkah memasak
                 const stepsHTML = recipe.steps.map((step, idx) => 
                     `<div class="flex gap-3 text-sm text-premiumPink-dark/80">
                         <span class="font-serif font-bold text-premiumPink-300">${idx + 1}.</span>
@@ -224,7 +227,6 @@
             });
 
             resultsSection.classList.remove('hidden');
-            // Auto scroll halus ke section resep setelah selesai render
             resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
