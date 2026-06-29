@@ -1,31 +1,47 @@
-const express = require('express');
-const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-require('dotenv').config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+module.exports = async (req, res) => {
+    // 1. Penanganan CORS Manual untuk Vercel Serverless
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*'); 
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-// Enable CORS so your GitHub Pages frontend can communicate safely with Biznet
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+    // Tangani request preflight OPTIONS dari browser
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
-const apiKey = process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey);
+    // Pastikan hanya menerima request POST
+    if (req.method !== 'POST') {
+        return res.status(405).json({ success: false, error: 'Method not allowed. Gunakan POST.' });
+    }
 
-app.post('/api/analyze', async (req, res) => {
     try {
         const { image, mimeType } = req.body;
 
         if (!image || !mimeType) {
-            return res.status(400).json({ error: 'Image data or MIME type is missing!' });
+            return res.status(400).json({ success: false, error: 'Data gambar atau MIME type tidak ditemukan!' });
         }
 
+        // Validasi keberadaan API Key sebelum menembak Google Gemini
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            return res.status(500).json({ 
+                success: false, 
+                error: 'GEMINI_API_KEY tidak ditemukan di Environment Variables Vercel. Sila periksa kembali setelan proyek Vercel kamu.' 
+            });
+        }
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        
+        // Mempertahankan model pilihan asli kamu: gemini-2.5-flash
         const model = genAI.getGenerativeModel({ 
             model: 'gemini-2.5-flash',
             generationConfig: { responseMimeType: "application/json" }
         });
 
+        // Mempertahankan prompt asli bawaan kamu
         const prompt = `Analyze the contents of the refrigerator in this photo. Based on the available ingredients, provide 3 to 5 feasible recipe recommendations and group them by their respective cuisine type (e.g., "Indonesian Recipe", "Chinese Recipe", "Italian Recipe", "American Recipe", "Mexican Recipe").
 
 You MUST return a valid JSON Array where each object contains "cuisine", "name", "image_keyword" (strictly provide 1 single lowercase English food category word, chosen ONLY from this list: "omelette", "stirfry", "pasta", "salad", "soup", "rice", "chicken"), "ingredients" (array of strings), and "steps" (array of strings). Follow this exact structural schema:
@@ -47,6 +63,7 @@ You MUST return a valid JSON Array where each object contains "cuisine", "name",
         const response = await result.response;
         const text = response.text();
 
+        // Pembersihan tag markdown ```json ... ``` seandainya model AI tidak patuh
         let cleanText = text.trim();
         if (cleanText.startsWith("```json")) {
             cleanText = cleanText.replace(/^```json/, "").replace(/```$/, "");
@@ -56,19 +73,20 @@ You MUST return a valid JSON Array where each object contains "cuisine", "name",
 
         try {
             const parsedRecipes = JSON.parse(cleanText.trim());
-            res.json({ success: true, recipes: parsedRecipes });
+            return res.status(200).json({ success: true, recipes: parsedRecipes });
         } catch (jsonError) {
-            res.status(500).json({ success: false, error: "AI returned invalid JSON formatting." });
+            return res.status(500).json({ 
+                success: false, 
+                error: "AI menghasilkan format JSON yang tidak valid.",
+                details: jsonError.message 
+            });
         }
 
     } catch (error) {
-        res.status(500).json({ success: false, error: 'Failed to process image or parse AI JSON layout.', details: error.message });
+        // Mengembalikan pesan error asli dari Google Gemini secara jujur ke frontend
+        return res.status(500).json({ 
+            success: false, 
+            error: error.message || 'Gagal memproses gambar atau mengurai layout JSON AI.' 
+        });
     }
-});
-
-// Serve static assets if any
-app.use(express.static(__dirname));
-
-app.listen(PORT, () => {
-    console.log(`🚀 WTFridge? Engine running successfully on port ${PORT}`);
-});
+};
