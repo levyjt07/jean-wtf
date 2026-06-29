@@ -35,11 +35,11 @@ module.exports = async (req, res) => {
         // 2. BERSIHKAN OTOMATIS: Hapus spasi dan tanda kutip (" atau ') yang tidak sengaja ikut ter-paste
         const cleanApiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
 
-        // 3. FITUR DETEKTOR MANDIRI: Cek apakah format kuncinya sudah benar diawali AIzaSy
-        if (!cleanApiKey.startsWith("AIzaSy")) {
+        // 3. FITUR DETEKTOR MANDIRI: Mendukung format lama (AIzaSy) dan format baru (AQ.) secara resmi
+        if (!cleanApiKey.startsWith("AIzaSy") && !cleanApiKey.startsWith("AQ.")) {
             return res.status(500).json({
                 success: false,
-                error: `[DETEKSI FORMAT SALAH] API Key di Vercel terdeteksi rusak/salah paste! Google API Key harusnya diawali 'AIzaSy', tetapi sistem Vercel membaca awalan kuncimu sebagai: '${cleanApiKey.substring(0, 6)}...' (Panjang total: ${cleanApiKey.length} karakter). Sila hapus dan paste ulang dengan benar di dashboard Vercel.`
+                error: `[DETEKSI FORMAT SALAH] API Key harus diawali 'AIzaSy' atau 'AQ.', tetapi mendeteksi awalan: '${cleanApiKey.substring(0, 6)}...' (Panjang total: ${cleanApiKey.length} karakter). Sila periksa kembali di dashboard Vercel.`
             });
         }
 
